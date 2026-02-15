@@ -1,0 +1,56 @@
+name: Publish to OpenUPM
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (without v prefix, e.g., 1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            TAG="${{ github.event.release.tag_name }}"
+            VERSION="${TAG#v}"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Publishing version: $VERSION"
+
+      - name: Update package version
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+
+          # Update package.json
+          jq --arg v "$VERSION" '.version = $v' \
+            Assets/NGUI/package.json > tmp.json
+          mv tmp.json Assets/NGUI/package.json
+
+          # Update README.md manifest example
+          sed -i 's/"io.level3.ngui": "[^"]*"/"io.level3.ngui": "'"$VERSION"'"/' README.md
+
+      - name: Commit and push version update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Assets/NGUI/package.json README.md
+          git diff --staged --quiet || git commit -m "chore: bump version to ${{ steps.version.outputs.VERSION }}"
+          git push origin HEAD:master

@@ -1,0 +1,20 @@
+{
+  "name": "NGUI.Examples.Editor",
+  "rootNamespace": "",
+  "references": [
+    "NGUI",
+    "NGUI.Editor",
+    "NGUI.Examples"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

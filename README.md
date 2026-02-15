@@ -6,3 +6,50 @@ As of October 2025, NGUI is now completely free and open source. Feel free to us
 a thank you would be appreciated. :)
 
 -Michael "Aren" Lyashenko
+
+---
+
+## About this Fork
+
+This fork is maintained by [@Mazyod](https://github.com/Mazyod) to distribute NGUI as a Unity Package Manager (UPM) package via [OpenUPM](https://openupm.com). No code changes are made to the original source — only packaging files (assembly definitions, `package.json`, CI workflow) have been added.
+
+The original repository by Tasharen Entertainment is at: https://github.com/tasharen/ngui
+
+## Installation
+
+### Option 1: OpenUPM (Recommended)
+
+Add the OpenUPM scoped registry to your `Packages/manifest.json`:
+
+```json
+{
+  "scopedRegistries": [
+    {
+      "name": "OpenUPM",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "io.level3"
+      ]
+    }
+  ],
+  "dependencies": {
+    "io.level3.ngui": "0.0.0"
+  }
+}
+```
+
+### Option 2: Git URL
+
+Add the following to your `Packages/manifest.json` dependencies:
+
+```json
+{
+  "dependencies": {
+    "io.level3.ngui": "https://github.com/Mazyod/ngui.git?path=Assets/NGUI"
+  }
+}
+```
+
+## License
+
+[MIT](LICENSE)

@@ -1,0 +1,16 @@
+{
+  "name": "NGUI.Examples",
+  "rootNamespace": "",
+  "references": [
+    "NGUI"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
