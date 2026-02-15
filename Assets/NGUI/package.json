@@ -1,6 +1,6 @@
 {
   "name": "io.level3.ngui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "NGUI: Next-Gen UI",
   "description": "NGUI is a UI system for Unity, originally created by Tasharen Entertainment in 2011. This is a community-maintained fork.",
   "unity": "2021.3",
