@@ -1,11 +1,16 @@
 {
   "name": "io.level3.ngui",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "displayName": "NGUI: Next-Gen UI",
   "description": "NGUI is a UI system for Unity, originally created by Tasharen Entertainment in 2011. This is a community-maintained fork.",
   "unity": "2021.3",
   "license": "MIT",
-  "keywords": ["ui", "gui", "ngui", "user-interface"],
+  "keywords": [
+    "ui",
+    "gui",
+    "ngui",
+    "user-interface"
+  ],
   "author": {
     "name": "Tasharen Entertainment Inc.",
     "url": "https://github.com/tasharen/ngui"

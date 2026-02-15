@@ -33,7 +33,7 @@ Add the OpenUPM scoped registry to your `Packages/manifest.json`:
     }
   ],
   "dependencies": {
-    "io.level3.ngui": "0.0.0"
+    "io.level3.ngui": "1.0.0"
   }
 }
 ```
@@ -45,7 +45,7 @@ Add the following to your `Packages/manifest.json` dependencies:
 ```json
 {
   "dependencies": {
-    "io.level3.ngui": "https://github.com/Mazyod/ngui.git?path=Assets/NGUI"
+    "io.level3.ngui": "1.0.0"
   }
 }
 ```
