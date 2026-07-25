@@ -1618,7 +1618,17 @@ public class UICamera : MonoBehaviour
 					lastWorldPosition = ray.GetPoint(dist);
 					
 					if (mOverlap == null) mOverlap = new Collider2D[50];
-					var hitCount = Physics2D.OverlapPointNonAlloc(lastWorldPosition, mOverlap, mask);
+
+					// Reproduces ContactFilter2D.CreateLegacyFilter(mask, -Infinity, Infinity), which is
+					// what the removed OverlapPointNonAlloc used internally: the global trigger setting,
+					// the supplied layer mask, and an unbounded depth range.
+					var filter = new ContactFilter2D();
+					filter.useTriggers = Physics2D.queriesHitTriggers;
+					filter.SetLayerMask(mask);
+					filter.SetDepth(float.NegativeInfinity, float.PositiveInfinity);
+
+					var hitCount = Physics2D.OverlapPoint(lastWorldPosition, filter, mOverlap);
+					if (hitCount > mOverlap.Length) hitCount = mOverlap.Length;
 
 					if (hitCount > 1)
 					{

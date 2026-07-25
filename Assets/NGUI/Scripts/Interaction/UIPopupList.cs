@@ -186,6 +186,7 @@ public class UIPopupList : UIWidgetContainer
 	/// The only downside is that this must be done via code.
 	/// </summary>
 
+	[System.NonSerialized]
 	public List<object> itemData = new List<object>();
 
 	/// <summary>
@@ -1016,7 +1017,7 @@ public class UIPopupList : UIWidgetContainer
 				else if (GetComponent<Collider2D>() != null)
 				{
 					Rigidbody2D rb = mChild.AddComponent<Rigidbody2D>();
-					rb.isKinematic = true;
+					rb.bodyType = RigidbodyType2D.Kinematic;
 				}
 
 				var panel = mChild.AddComponent<UIPanel>();
