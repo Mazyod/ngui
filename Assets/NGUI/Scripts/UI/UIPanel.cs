@@ -350,7 +350,7 @@ public class UIPanel : UIRect
 		{
 			if (a.mDepth < b.mDepth) return -1;
 			if (a.mDepth > b.mDepth) return 1;
-			return (a.GetInstanceID() < b.GetInstanceID()) ? -1 : 1;
+			return (a.GetHashCode() < b.GetHashCode()) ? -1 : 1;
 		}
 		return 0;
 	}

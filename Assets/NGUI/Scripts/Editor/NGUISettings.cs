@@ -80,7 +80,7 @@ public class NGUISettings
 				}
 				else
 				{
-					EditorPrefs.SetString(name, obj.GetInstanceID().ToString());
+					EditorPrefs.SetString(name, obj.GetHashCode().ToString());
 				}
 			}
 			else EditorPrefs.DeleteKey(name);
@@ -163,7 +163,11 @@ public class NGUISettings
 		{
 			int id;
 			if (int.TryParse(path, out id))
+#if UNITY_6000_5_OR_NEWER
+				return EditorUtility.EntityIdToObject(id) as T;
+#else
 				return EditorUtility.InstanceIDToObject(id) as T;
+#endif
 		}
 		return retVal;
 	}

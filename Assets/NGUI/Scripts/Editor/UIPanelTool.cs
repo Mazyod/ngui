@@ -39,7 +39,7 @@ public class UIPanelTool : EditorWindow
 			if (a.panel.depth > b.panel.depth) return 1;
 			int val = string.Compare(a.panel.name, b.panel.name);
 			if (val != 0) return val;
-			return (a.panel.GetInstanceID() < b.panel.GetInstanceID()) ? -1 : 1;
+			return (a.panel.GetHashCode() < b.panel.GetHashCode()) ? -1 : 1;
 		}
 		return 0;
 	}
