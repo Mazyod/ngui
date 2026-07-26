@@ -35,6 +35,13 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "Publishing version: $VERSION"
 
+      # IMPORTANT: bump the manifest and push it BEFORE creating the release/tag.
+      # OpenUPM builds the tagged commit and requires the package.json version at
+      # that commit to equal the tag. Bumping afterwards (as this workflow used to
+      # be relied on to do) leaves every tag one version behind its manifest, and
+      # OpenUPM then publishes nothing -- v1.0.0 through v1.0.2 all failed that way.
+      # This step is now an idempotent safety net; it still matters for
+      # workflow_dispatch republishing.
       - name: Update package version
         run: |
           VERSION="${{ steps.version.outputs.VERSION }}"
