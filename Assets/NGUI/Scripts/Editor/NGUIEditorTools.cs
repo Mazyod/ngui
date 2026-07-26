@@ -4,7 +4,6 @@
 //-------------------------------------------------
 
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -617,7 +616,7 @@ static public class NGUIEditorTools
 	{
 		if (tex != null)
 		{
-			var path = AssetDatabase.GetAssetPath(tex.GetInstanceID());
+			var path = AssetDatabase.GetAssetPath(tex);
 			return ImportTexture(path, forInput, force, alphaTransparency);
 		}
 		return null;
@@ -644,7 +643,7 @@ static public class NGUIEditorTools
 
 		if (texture != null)
 		{
-			path = AssetDatabase.GetAssetPath(texture.GetInstanceID());
+			path = AssetDatabase.GetAssetPath(texture);
 
 			if (!string.IsNullOrEmpty(path))
 			{
@@ -654,7 +653,7 @@ static public class NGUIEditorTools
 		}
 
 		// No texture to use -- figure out a name using the atlas
-		path = AssetDatabase.GetAssetPath(obj.GetInstanceID());
+		path = AssetDatabase.GetAssetPath(obj);
 		path = string.IsNullOrEmpty(path) ? "Assets/" + obj.name + ".png" : path.Replace(".asset", ".png");
 		return path;
 	}
@@ -667,7 +666,7 @@ static public class NGUIEditorTools
 	{
 		if (Selection.activeObject != null)
 		{
-			string path = AssetDatabase.GetAssetPath(Selection.activeObject.GetInstanceID());
+			string path = AssetDatabase.GetAssetPath(Selection.activeObject);
 
 			if (!string.IsNullOrEmpty(path))
 			{
@@ -1900,6 +1899,30 @@ static public class NGUIEditorTools
 #endif
 	}
 
+	// Unity 6000.5 replaced instance IDs with EntityId. These two helpers reproduce exactly what
+	// Unity's own (now obsolete-as-error) objectReferenceInstanceIDValue property did internally,
+	// which keeps the public int-based GetClassID/ReplaceClass API unchanged for existing users.
+	// NOTE: the int -> EntityId conversion below is itself deprecated. When Unity removes it, this
+	// helper and the matching one in NGUISettings.Get are the two places that need revisiting.
+
+	static int GetScriptID (SerializedProperty property)
+	{
+#if UNITY_6000_5_OR_NEWER
+		return unchecked((int)EntityId.ToULong(property.objectReferenceEntityIdValue));
+#else
+		return property.objectReferenceInstanceIDValue;
+#endif
+	}
+
+	static void SetScriptID (SerializedProperty property, int classID)
+	{
+#if UNITY_6000_5_OR_NEWER
+		property.objectReferenceEntityIdValue = classID;
+#else
+		property.objectReferenceInstanceIDValue = classID;
+#endif
+	}
+
 	/// <summary>
 	/// Gets the internal class ID of the specified type.
 	/// </summary>
@@ -1909,7 +1932,7 @@ static public class NGUIEditorTools
 		var go = EditorUtility.CreateGameObjectWithHideFlags("Temp", HideFlags.HideAndDontSave);
 		var uiSprite = go.AddComponent(type);
 		var ob = new SerializedObject(uiSprite);
-		var classID = ob.FindProperty("m_Script").objectReferenceInstanceIDValue;
+		var classID = GetScriptID(ob.FindProperty("m_Script"));
 		NGUITools.DestroyImmediate(go);
 		return classID;
 	}
@@ -1932,7 +1955,7 @@ static public class NGUIEditorTools
 		var id = GetClassID(type);
 		var ob = new SerializedObject(mb);
 		ob.Update();
-		ob.FindProperty("m_Script").objectReferenceInstanceIDValue = id;
+		SetScriptID(ob.FindProperty("m_Script"), id);
 		ob.ApplyModifiedProperties();
 		ob.Update();
 		return ob;
@@ -1946,7 +1969,7 @@ static public class NGUIEditorTools
 	{
 		var ob = new SerializedObject(mb);
 		ob.Update();
-		ob.FindProperty("m_Script").objectReferenceInstanceIDValue = classID;
+		SetScriptID(ob.FindProperty("m_Script"), classID);
 		ob.ApplyModifiedProperties();
 		ob.Update();
 		return ob;
@@ -1958,7 +1981,7 @@ static public class NGUIEditorTools
 
 	static public void ReplaceClass (SerializedObject ob, int classID)
 	{
-		ob.FindProperty("m_Script").objectReferenceInstanceIDValue = classID;
+		SetScriptID(ob.FindProperty("m_Script"), classID);
 		ob.ApplyModifiedProperties();
 		ob.Update();
 	}
@@ -1969,7 +1992,7 @@ static public class NGUIEditorTools
 
 	static public void ReplaceClass (SerializedObject ob, System.Type type)
 	{
-		ob.FindProperty("m_Script").objectReferenceInstanceIDValue = GetClassID(type);
+		SetScriptID(ob.FindProperty("m_Script"), GetClassID(type));
 		ob.ApplyModifiedProperties();
 		ob.Update();
 	}
@@ -2203,8 +2226,6 @@ static public class NGUIEditorTools
 		return (!string.IsNullOrEmpty(path)) ? AssetDatabase.AssetPathToGUID(path) : null;
 	}
 
-	private static MethodInfo s_GetInstanceIDFromGUID;
-
 	/// <summary>
 	/// Convert the specified GUID to an object reference.
 	/// </summary>
@@ -2212,21 +2233,6 @@ static public class NGUIEditorTools
 	static public Object GUIDToObject (string guid)
 	{
 		if (string.IsNullOrEmpty(guid)) return null;
-
-		if (s_GetInstanceIDFromGUID == null)
-		{
-			var type = typeof(AssetDatabase);
-
-			// Unity 3, 4, 5 and 2017
-			s_GetInstanceIDFromGUID = type.GetMethod("GetInstanceIDFromGUID", BindingFlags.Static | BindingFlags.NonPublic);
-
-			// Unity 2018+
-			if (s_GetInstanceIDFromGUID == null) s_GetInstanceIDFromGUID = type.GetMethod("GetMainAssetInstanceID", BindingFlags.Static | BindingFlags.NonPublic);
-			if (s_GetInstanceIDFromGUID == null) return null;
-		}
-
-		int id = (int)s_GetInstanceIDFromGUID.Invoke(null, new object[] { guid });
-		if (id != 0) return EditorUtility.InstanceIDToObject(id);
 		string path = AssetDatabase.GUIDToAssetPath(guid);
 		if (string.IsNullOrEmpty(path)) return null;
 		return AssetDatabase.LoadAssetAtPath(path, typeof(Object));
