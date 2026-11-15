@@ -6,6 +6,11 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+#if UNITY_6000_5_OR_NEWER
+using ObjectId = UnityEngine.EntityId;
+#else
+using ObjectId = System.Int32;
+#endif
 
 /// <summary>
 /// Tools for the editor
@@ -1899,22 +1904,16 @@ static public class NGUIEditorTools
 #endif
 	}
 
-	// Unity 6000.5 replaced instance IDs with EntityId. These two helpers reproduce exactly what
-	// Unity's own (now obsolete-as-error) objectReferenceInstanceIDValue property did internally,
-	// which keeps the public int-based GetClassID/ReplaceClass API unchanged for existing users.
-	// NOTE: the int -> EntityId conversion below is itself deprecated. When Unity removes it, this
-	// helper and the matching one in NGUISettings.Get are the two places that need revisiting.
-
-	static int GetScriptID (SerializedProperty property)
+	static ObjectId GetScriptID (SerializedProperty property)
 	{
 #if UNITY_6000_5_OR_NEWER
-		return unchecked((int)EntityId.ToULong(property.objectReferenceEntityIdValue));
+		return property.objectReferenceEntityIdValue;
 #else
 		return property.objectReferenceInstanceIDValue;
 #endif
 	}
 
-	static void SetScriptID (SerializedProperty property, int classID)
+	static void SetScriptID (SerializedProperty property, ObjectId classID)
 	{
 #if UNITY_6000_5_OR_NEWER
 		property.objectReferenceEntityIdValue = classID;
@@ -1927,7 +1926,7 @@ static public class NGUIEditorTools
 	/// Gets the internal class ID of the specified type.
 	/// </summary>
 
-	static public int GetClassID (System.Type type)
+	static public ObjectId GetClassID (System.Type type)
 	{
 		var go = EditorUtility.CreateGameObjectWithHideFlags("Temp", HideFlags.HideAndDontSave);
 		var uiSprite = go.AddComponent(type);
@@ -1941,7 +1940,7 @@ static public class NGUIEditorTools
 	/// Gets the internal class ID of the specified type.
 	/// </summary>
 
-	static public int GetClassID<T> () where T : MonoBehaviour
+	static public ObjectId GetClassID<T> () where T : MonoBehaviour
 	{
 		return GetClassID(typeof(T));
 	}
@@ -1965,7 +1964,7 @@ static public class NGUIEditorTools
 	/// Convenience function that replaces the specified MonoBehaviour with one of specified class ID.
 	/// </summary>
 
-	static public SerializedObject ReplaceClass (MonoBehaviour mb, int classID)
+	static public SerializedObject ReplaceClass (MonoBehaviour mb, ObjectId classID)
 	{
 		var ob = new SerializedObject(mb);
 		ob.Update();
@@ -1979,7 +1978,7 @@ static public class NGUIEditorTools
 	/// Convenience function that replaces the specified MonoBehaviour with one of specified class ID.
 	/// </summary>
 
-	static public void ReplaceClass (SerializedObject ob, int classID)
+	static public void ReplaceClass (SerializedObject ob, ObjectId classID)
 	{
 		SetScriptID(ob.FindProperty("m_Script"), classID);
 		ob.ApplyModifiedProperties();

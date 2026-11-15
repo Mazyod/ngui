@@ -80,7 +80,11 @@ public class NGUISettings
 				}
 				else
 				{
-					EditorPrefs.SetString(name, obj.GetHashCode().ToString());
+#if UNITY_6000_5_OR_NEWER
+					EditorPrefs.SetString(name, EntityId.ToULong(obj.GetEntityId()).ToString());
+#else
+					EditorPrefs.SetString(name, obj.GetInstanceID().ToString());
+#endif
 				}
 			}
 			else EditorPrefs.DeleteKey(name);
@@ -161,11 +165,13 @@ public class NGUISettings
 
 		if (retVal == null)
 		{
+#if UNITY_6000_5_OR_NEWER
+			ulong id;
+			if (ulong.TryParse(path, out id))
+				return EditorUtility.EntityIdToObject(EntityId.FromULong(id)) as T;
+#else
 			int id;
 			if (int.TryParse(path, out id))
-#if UNITY_6000_5_OR_NEWER
-				return EditorUtility.EntityIdToObject(id) as T;
-#else
 				return EditorUtility.InstanceIDToObject(id) as T;
 #endif
 		}
